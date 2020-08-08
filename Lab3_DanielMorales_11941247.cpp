@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -64,17 +65,18 @@ Libro::~Libro()
 class Catalogo
 {
 private:
-    vector<Libro*> libros;
+    vector<Libro *> libros;
 
 public:
-    Catalogo(vector<Libro*>);
+    Catalogo(vector<Libro *>);
     Catalogo();
-    void setLibros(vector<Libro*>);
-    vector<Libro*> getLibros();
-    void addLibro(Libro*);
+    void setLibros(vector<Libro *>);
+    vector<Libro *> getLibros();
+    void addLibro(Libro *);
+    ~Catalogo();
 };
 
-Catalogo::Catalogo(vector<Libro*> _libros)
+Catalogo::Catalogo(vector<Libro *> _libros)
 {
     libros = _libros;
 }
@@ -83,17 +85,20 @@ Catalogo::Catalogo()
 {
 }
 
-void Catalogo::setLibros(vector<Libro*> _libros)
+Catalogo::~Catalogo() {}
+
+void Catalogo::setLibros(vector<Libro *> _libros)
 {
     libros = _libros;
 }
 
-vector<Libro*> Catalogo::getLibros()
+vector<Libro *> Catalogo::getLibros()
 {
+
     return libros;
 }
 
-void Catalogo::addLibro(Libro* _libro)
+void Catalogo::addLibro(Libro *_libro)
 {
     libros.push_back(_libro);
 }
@@ -102,7 +107,7 @@ class Biblioteca
 {
 private:
     string nombre, ubicacion;
-    int pisos;
+    int pisos, estante, seccion;
     Catalogo ****simulacionBiblio;
 
 public:
@@ -111,7 +116,10 @@ public:
     string getUbicacion();
     void setNombre(string);
     void setUbicacion(string);
-    Catalogo**** getCubo();
+    int getPisos();
+    int getEstantes();
+    int getSecciones();
+    Catalogo ****getCubo();
     ~Biblioteca();
 };
 
@@ -119,6 +127,9 @@ Biblioteca::Biblioteca(string _nombre, string _ubicacion, int _pisos, int _estan
 { //Constructor biblioteca
     nombre = _nombre;
     ubicacion = _ubicacion;
+    pisos = _pisos;
+    estante = _estantes;
+    seccion = _secciones;
 
     simulacionBiblio = new Catalogo ***[_pisos];
 
@@ -136,7 +147,23 @@ Biblioteca::Biblioteca(string _nombre, string _ubicacion, int _pisos, int _estan
     }
 }
 
-Catalogo**** Biblioteca::getCubo(){
+int Biblioteca::getPisos()
+{
+    return pisos;
+}
+
+int Biblioteca::getEstantes()
+{
+    return estante;
+}
+
+int Biblioteca::getSecciones()
+{
+    return seccion;
+}
+
+Catalogo ****Biblioteca::getCubo()
+{
     return simulacionBiblio;
 }
 
@@ -201,14 +228,8 @@ int main()
             Biblioteca biblio(nombreBiblioteca, ubicacionBiblioteca, pisos, estantes, secciones);
             bibliotecas.push_back(biblio);
 
+
             std::cout << "La biblioteca fue creada exitosamente. " << std::endl;
-
-            // std::cout << "" << std::endl;
-
-            // for (int i = 0; i < bibliotecas.size(); i++)
-            // {
-            //     std::cout << "La biblioteca " << i << " es " << bibliotecas.at(i).getNombre() << std::endl;
-            // }
         }
         break;
 
@@ -226,12 +247,10 @@ int main()
                 cin >> nombre;
                 std::cout << "Ingrese el autor del libro: " << std::endl;
                 cin >> autor;
-                std::cout << "Ingrese el año de publicacion del libro: " << std::endl;
+                std::cout << "Ingrese el anio de publicacion del libro: " << std::endl;
                 cin >> year;
 
-                //creacion de objeto libro 
-                
-
+                //creacion de objeto libro
 
                 std::cout << "Seleccione el indice de la biblioteca a la cual desea agregar el libro: " << std::endl;
 
@@ -246,17 +265,194 @@ int main()
 
                 std::cout << "Ingrese el piso: " << std::endl;
                 cin >> piso;
+
+                while (piso > bibliotecas.at(indSelBibl).getPisos())
+                {
+                    std::cout << "Ingrese el piso: " << std::endl;
+                    cin >> piso;
+                }
+
                 std::cout << "Ingrese el estante: " << std::endl;
                 cin >> estante;
+
+                while (estante > bibliotecas.at(indSelBibl).getEstantes())
+                {
+                    std::cout << "Ingrese el estante: " << std::endl;
+                    cin >> estante;
+                }
+
                 std::cout << "Ingrese la seccion: " << std::endl;
-                cin >> seccion;     
+                cin >> seccion;
+
+                while (seccion > bibliotecas.at(indSelBibl).getSecciones())
+                {
+                    std::cout << "Ingrese la seccion: " << std::endl;
+                    cin >> seccion;
+                }
 
                 Libro* temporal = new Libro(nombre, autor, year);
 
                 bibliotecas.at(indSelBibl).getCubo()[piso][estante][seccion]->addLibro(temporal);
-                
 
-                
+
+                std::cout << "El libro se agrego exitosamente. " << std::endl;
+            }
+        }
+        break;
+
+        case 3:
+        {
+            std::cout << "Ingrese el nombre del libro que desea buscar: " << std::endl;
+            string nombreLibroABuscar;
+            cin >> nombreLibroABuscar;
+
+            for (int i = 0; i < bibliotecas.size(); i++)
+            {
+                for (int j = 0; j < bibliotecas.at(i).getPisos(); j++)
+                {
+                    for (int k = 0; k < bibliotecas.at(i).getEstantes(); k++)
+                    {
+                        for (int l = 0; l < bibliotecas.at(i).getSecciones(); l++)
+                        {
+                            for (int n = 0; n < bibliotecas.at(i).getCubo()[j][k][l]->getLibros().size(); n++)
+                            {
+                                if (bibliotecas.at(i).getCubo()[j][k][l]->getLibros().at(n)->getTitulo() == nombreLibroABuscar)
+                                {
+                                    std::cout << "" << std::endl;
+                                    std::cout << "Titulo: " << bibliotecas.at(i).getCubo()[j][k][l]->getLibros().at(n)->getTitulo() << std::endl;
+                                    std::cout << "Autor: " << bibliotecas.at(i).getCubo()[j][k][l]->getLibros().at(n)->getAutor() << std::endl;
+                                    std::cout << "Anio: " << bibliotecas.at(i).getCubo()[j][k][l]->getLibros().at(n)->getYearPublicado() << std::endl;
+                                    std::cout << "Biblioteca: " << bibliotecas.at(i).getNombre() << std::endl;
+                                    std::cout << "Ubicado en el piso " << j << " del estante " << k << " de la seccion " << l << " ." << std::endl;
+                                    std::cout << "" << std::endl;
+                                }
+                                else
+                                {
+                                    std::cout << "No se encontro ningun libro con ese nombre." << std::endl;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        break;
+
+        case 4:
+        {
+            std::cout << "Ingrese el nombre del autor del libro que desea buscar: " << std::endl;
+            string nombreAutorABuscar;
+            cin >> nombreAutorABuscar;
+
+            for (int i = 0; i < bibliotecas.size(); i++)
+            {
+                for (int j = 0; j < bibliotecas.at(i).getPisos(); j++)
+                {
+                    for (int k = 0; k < bibliotecas.at(i).getEstantes(); k++)
+                    {
+                        for (int l = 0; l < bibliotecas.at(i).getSecciones(); l++)
+                        {
+                            for (int n = 0; n < bibliotecas.at(i).getCubo()[j][k][l]->getLibros().size(); n++)
+                            {
+                                if (bibliotecas.at(i).getCubo()[j][k][l]->getLibros().at(n)->getAutor() == nombreAutorABuscar)
+                                {
+                                    std::cout << "" << std::endl;
+                                    std::cout << "Titulo: " << bibliotecas.at(i).getCubo()[j][k][l]->getLibros().at(n)->getTitulo() << std::endl;
+                                    std::cout << "Autor: " << bibliotecas.at(i).getCubo()[j][k][l]->getLibros().at(n)->getAutor() << std::endl;
+                                    std::cout << "Anio: " << bibliotecas.at(i).getCubo()[j][k][l]->getLibros().at(n)->getYearPublicado() << std::endl;
+                                    std::cout << "Biblioteca: " << bibliotecas.at(i).getNombre() << std::endl;
+                                    std::cout << "Ubicado en el piso " << j << " del estante " << k << " de la seccion " << l << " ." << std::endl;
+                                    std::cout << "" << std::endl;
+                                }
+                                else
+                                {
+
+                                    std::cout << "No se encontro ningun libro con ese autor." << std::endl;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        break;
+
+        case 5:
+        {
+            std::cout << "***BIBLIOTECAS***" << std::endl;
+            std::cout << "Ingrese el indice de la biblioteca que desea explorar: " << std::endl;
+            for (int i = 0; i < bibliotecas.size(); i++)
+            {
+                std::cout << i << ". " << bibliotecas.at(i).getNombre() << std::endl;
+            }
+            int indBiblioSel;
+            cin >> indBiblioSel;
+
+            int piso, estante, seccion;
+
+            std::cout << "Ingrese el piso: " << std::endl;
+            cin >> piso;
+            while (piso > bibliotecas.at(indBiblioSel).getPisos())
+            {
+                std::cout << "Ingrese el piso: " << std::endl;
+                cin >> piso;
+            }
+
+            std::cout << "Ingrese el estante: " << std::endl;
+            cin >> estante;
+
+            while (estante > bibliotecas.at(indBiblioSel).getEstantes())
+            {
+                std::cout << "Ingrese el estante: " << std::endl;
+                cin >> estante;
+            }
+
+            std::cout << "Ingrese la seccion: " << std::endl;
+            cin >> seccion;
+
+            while (seccion > bibliotecas.at(indBiblioSel).getSecciones())
+            {
+                std::cout << "Ingrese la seccion: " << std::endl;
+                cin >> seccion;
+            }
+
+            Libro *objetoTemporal;
+            vector<Libro *> librosOrdenados;
+
+            for (int i = 0; i < bibliotecas.at(indBiblioSel).getCubo()[piso][estante][seccion]->getLibros().size(); i++)
+            {
+                librosOrdenados.push_back(bibliotecas.at(indBiblioSel).getCubo()[piso][estante][seccion]->getLibros().at(i));
+            }
+
+            for (int i = 0; i < librosOrdenados.size(); i++)
+            {
+                for (int j = 0; j < librosOrdenados.size() - 1; j++)
+                {
+                    if (librosOrdenados[j]->getTitulo() > librosOrdenados[j + 1]->getTitulo())
+                    {
+                        objetoTemporal = librosOrdenados[j];
+                        librosOrdenados[j] = librosOrdenados[j + 1];
+                        librosOrdenados[j + 1] = objetoTemporal;
+                    }
+                }
+            }
+
+            // for (int i = 0; i < bibliotecas.at(indBiblioSel).getCubo()[piso][estante][seccion]->getLibros().size(); i++)
+            // {
+            //     std::cout << "" << std::endl;
+            //     std::cout << "Titulo: " << bibliotecas.at(indBiblioSel).getCubo()[piso][estante][seccion]->getLibros().at(i)->getTitulo() << std::endl;
+            //     std::cout << "Autor: " << bibliotecas.at(indBiblioSel).getCubo()[piso][estante][seccion]->getLibros().at(i)->getAutor() << std::endl;
+            //     std::cout << "Anio de publicacion: " << bibliotecas.at(indBiblioSel).getCubo()[piso][estante][seccion]->getLibros().at(i)->getYearPublicado() << std::endl;
+            //     std::cout << "" << std::endl;
+            // }
+
+            for (int i = 0; i < librosOrdenados.size(); i++)
+            {
+                std::cout << "" << std::endl;
+                std::cout << "Titulo: " << librosOrdenados.at(i)->getTitulo() << std::endl;
+                std::cout << "Autor: " << librosOrdenados.at(i)->getAutor() << std::endl;
+                std::cout << "Anio de publicacion: " << librosOrdenados.at(i)->getYearPublicado() << std::endl;
+                std::cout << "" << std::endl;
             }
         }
         break;
